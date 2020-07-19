@@ -1,0 +1,47 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  remote_user: vagrant
+
+  tasks:
+
+  - name: "[Task 1] Installation des prerequis Docker"
+    yum:
+      name: 
+        - yum-utils 
+        - device-mapper-persistent-data 
+        - lvm2
+      state: present
+
+  - name: "[Task 2] Configuration du repository Docker"
+    shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+
+  - name: "[Task 3] installation Docker runtime"
+    yum:
+      name: docker-ce
+      update_cache: yes
+      state: present
+
+  - name: "[Task 4] creation dossier /etc/docker"
+    file: 
+      path: /etc/docker
+      state: directory
+
+  - name: "[Task 5] personalisation cgroupdriver=systemd"
+    copy: 
+      src: daemon.json
+      dest: /etc/docker/daemon.json
+
+  - name: "[Task 6] Start & Enable Docker"
+    systemd: 
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: "[Task 7] add vagrant user to docker group"
+    user:
+      name: vagrant
+      append: yes
+      groups: docker

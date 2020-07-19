@@ -1,0 +1,1 @@
+kubeadm join 172.15.20.10:6443 --token snp1j8.6l9dcfe1ss8ht2wp     --discovery-token-ca-cert-hash sha256:0ec30bdcfd7e5a7444ab87706d4feba8723048a4c33a92eac6a6336f210e3b8f 

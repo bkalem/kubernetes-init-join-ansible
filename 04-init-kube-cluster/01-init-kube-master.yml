@@ -1,0 +1,42 @@
+---
+- hosts: master
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  remote_user: vagrant
+
+  tasks: 
+
+  - name: "[Task 1] kubernetes cluster initiation"
+    command: "kubeadm init --apiserver-advertise-address=172.15.20.10 --pod-network-cidr=172.20.0.0/16"
+
+  - name: "[Task 2] creation /root/.kube/"
+    file:
+      path: /root/.kube/
+      state: directory
+
+  - name: "[Task 3] copie de la config admin kubernetes"
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /root/.kube/config
+      owner: root
+      group: root
+      remote_src: yes
+
+  - name: "[Task 4] creation /home/vagrant/.kube/"
+    file:
+      path: /home/vagrant/.kube/
+      state: directory
+      owner: vagrant
+      group: vagrant
+
+  - name: "[Task 5] copie de la config admin kubernetes"
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /home/vagrant/.kube/config
+      owner: vagrant
+      group: vagrant
+      remote_src: yes
+
+  - name: "[Task 6] deploiment network calico"
+    command: "kubectl create -f https://docs.projectcalico.org/v3.15/manifests/calico.yaml" 

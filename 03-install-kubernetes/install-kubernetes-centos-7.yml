@@ -1,0 +1,55 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  gather_facts: no
+  remote_user: vagrant
+    
+  tasks:
+    
+  - name: "[Task 1] sysctl bridge"
+    copy:
+      src: sysctl-kubernetes.conf
+      dest: /etc/sysctl.d/kubernetes.conf
+
+  - name: "[Task 2] sysctl reload"
+    shell: "sysctl --system"
+
+  - name: "[Task 3] desactivation swap /etc/fstab"
+    replace:
+      path: /etc/fstab
+      regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+      replace: '#\1\2\3swap\4'
+      backup: yes
+
+  - name: "[Task 4] off swap"
+    shell: "swapoff -a"
+
+  - name: "[Task 5] desactivation et off firewalld"
+    systemd:
+      name: firewalld
+      state: stopped
+      enabled: no
+
+  - name: "[Task 6] desactivation et off SELinux"
+    selinux:
+      state: disabled
+
+  - name: "[Task 7] repository Kubernetes"
+    copy: 
+      src: kubernetes.repo
+      dest: /etc/yum.repos.d/kubernetes.repo
+
+  - name: "[Task 8] installation Kubernetes"
+    yum:
+      name:
+        - kubeadm
+        - kubelet
+        - kubectl
+      state: present
+
+  - name: "[Task 9] activation et on kubelet"
+    systemd:
+      name: kubelet
+      state: started
+      enabled: yes
